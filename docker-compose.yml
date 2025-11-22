@@ -12,8 +12,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: user_toko
-      POSTGRES_PASSWORD: password_toko
-      POSTGRES_DB: db_toko_online
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ./pg_data:/var/lib/postgresql/data
