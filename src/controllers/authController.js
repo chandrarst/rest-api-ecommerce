@@ -8,7 +8,7 @@ const register = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "Semua kolom harus diisi." });
+      return res.status(400).json({ error: "Name, email, and password are required." });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -16,7 +16,7 @@ const register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: "Email sudah digunakan." });
+      return res.status(400).json({ error: "Email is already registered." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,7 +31,7 @@ const register = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Registrasi berhasil.",
+      message: "Registration successful",
       data: {
         id: user.id,
         name: user.name,
@@ -41,7 +41,7 @@ const register = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Terjadi kesalahan pada server." });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -50,7 +50,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "Email dan Password wajib diisi." });
+      return res.status(400).json({ error: "Email and password are required." });
     }
 
     const user = await prisma.user.findUnique({
@@ -58,23 +58,23 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Email atau Password salah." });
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Email atau Password salah!" });
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET, 
+      process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
     res.json({
-      message: "Login berhasil.",
+      message: "Login successful",
       token: token,
       user: {
         id: user.id,
@@ -85,9 +85,8 @@ const login = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Terjadi kesalahan pada server." });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 module.exports = { register, login };
