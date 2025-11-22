@@ -1,0 +1,19 @@
+version: '3.8'
+
+### COMMANDS ###
+# RUN: docker-compose up -d
+# STOP: docker-compose down
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ecommerce-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user_toko
+      POSTGRES_PASSWORD: password_toko
+      POSTGRES_DB: db_toko_online
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data

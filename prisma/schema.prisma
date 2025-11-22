@@ -1,0 +1,64 @@
+// Connection
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Table
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("CUSTOMER")
+  createdAt DateTime @default(now())
+  
+  // Relation: Satu User bisa punya banyak Order
+  orders    Order[]
+}
+
+// Pruduct Table
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  // nullable
+  price       Float
+  stock       Int
+  photo       String?  //  berisikan link foto produk
+  createdAt   DateTime @default(now())
+
+  // Relation: Satu Produk bisa ada di banyak detail Order
+  orderItems  OrderItem[]
+}
+
+// Order Table
+model Order {
+  id          Int      @id @default(autoincrement())
+  totalPrice  Float
+  status      String   @default("PENDING") // PENDING, PAID, SHIPPED
+  createdAt   DateTime @default(now())
+
+  // Relation: Order yang dimiliki oleh User
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Relation: List item dari Order
+  items       OrderItem[]
+}
+
+// Tabel OrderItem (detail dalam nota), penghubung karena 1 Order bisa beli banyak Product
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  price     Float   
+
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
