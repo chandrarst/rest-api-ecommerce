@@ -5,8 +5,8 @@ This project demonstrates a complete flow of an e-commerce system, including sec
 
 ## Live Demo
 
-* **Frontend (Storefront):** [[LINK_NETLIFY_KAMU_DISINI](https://rest-api-ecommerce.netlify.app/)]
-* **Backend (API Docs):** [[LINK_VERCEL_KAMU_DISINI](https://rest-api-ecommerce-ruddy.vercel.app/)]
+* **Frontend (Storefront):** [https://rest-api-ecommerce.netlify.app/]
+* **Backend (API Docs):** [https://rest-api-ecommerce-ruddy.vercel.app/]
 
 ---
 
