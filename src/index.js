@@ -28,6 +28,10 @@ app.use('/api/products', productRoutes);
 
 app.use('/api/orders', orderRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port: ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port: ${PORT}`);
+    });
+}
+
+module.exports = app;
