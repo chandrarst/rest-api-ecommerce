@@ -245,7 +245,16 @@
                 const isAdmin = JSON.parse(localStorage.getItem('user')).role === 'ADMIN';
                 listContainer.innerHTML = '';
                 products.forEach(p => {
-                    const imgUrl = p.photo ? `${BASE_URL}${p.photo}` : 'https://placehold.co/400x200?text=No+Photo';
+                    let imgUrl = 'https://placehold.co/400x200?text=No+Photo';
+
+                    if (p.photo) {
+                        if (p.photo.startsWith('http')) {
+                            imgUrl = p.photo;
+                        } else {
+                            imgUrl = `${BASE_URL}${p.photo}`;
+                        }
+                    }
+
                     const html = `
                         <div class="${isAdmin ? 'col-md-3' : 'col-md-6'}">
                             <div class="card product-card h-100" onclick='openProductModal(${JSON.stringify(p)})'>
