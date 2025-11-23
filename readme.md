@@ -2,7 +2,7 @@
 
 This repository contains the backend source code for a robust E-Commerce application. It is built using Node.js and Express, utilizing PostgreSQL as the relational database and Prisma as the ORM.
 
-The system is designed to handle essential e-commerce functionalities including user authentication (JWT), role-based access control (Admin/Customer), product management, and secure order processing with ACID-compliant database transactions to ensure data integrity between stock inventory and order records.
+The system is designed to handle essential e-commerce functionalities including user authentication (JWT), role-based access control (Admin/Customer), product management with image uploads, and secure order processing with ACID-compliant database transactions to ensure data integrity between stock inventory and order records.
 
 ## Tech Stack
 
@@ -11,15 +11,17 @@ The system is designed to handle essential e-commerce functionalities including 
 * **Database**: PostgreSQL (via Docker)
 * **ORM**: Prisma
 * **Authentication**: JSON Web Token (JWT) & Bcrypt
+* **File Handling**: Multer (Local Storage)
 * **Containerization**: Docker & Docker Compose
 
 ## Features
 
 * **Secure Authentication**: User registration and login mechanisms using hashed passwords and JWT for session management.
 * **Role-Based Access Control (RBAC)**: Middleware to differentiate between 'Customer' and 'Admin' roles, restricting sensitive endpoints.
-* **Product Management**: Full CRUD capabilities for administrators to manage inventory.
+* **Product Management**: Full CRUD capabilities for administrators to manage inventory, including **Image Upload**.
 * **Transactional Orders**: Implementation of database transactions (`prisma.$transaction`) to ensure that order creation and stock deduction happen atomically. If one fails, both rollback.
 * **Order History & Cancellation**: Users can view their specific order history and cancel orders, which automatically restores the product stock.
+* **Static File Serving**: Serves uploaded product images publicly.
 
 ---
 
@@ -81,35 +83,34 @@ Retrieves a list of all available products.
 
 #### Create Product
 Adds a new product to the inventory.
+**Note:** This endpoint uses `multipart/form-data` for file uploads.
 
 * **URL**: `/`
 * **Method**: `POST`
 * **Access**: Admin Only
-* **Headers**: `Authorization: Bearer <token>`
-* **Request Body**:
-    ```json
-    {
-      "name": "Gaming Laptop",
-      "description": "High performance laptop",
-      "price": 15000000,
-      "stock": 10
-    }
-    ```
+* **Headers**: 
+    * `Authorization: Bearer <token>`
+    * `Content-Type: multipart/form-data`
+* **Form Data Fields**:
+    * `name`: (Text) Product Name
+    * `description`: (Text) Product Description
+    * `price`: (Number) Product Price
+    * `stock`: (Number) Product Stock
+    * `image`: (File) Product Image (Optional, max 5MB)
 
 #### Update Product
-Updates an existing product's details.
+Updates an existing product's details or image.
 
 * **URL**: `/:id`
 * **Method**: `PUT`
 * **Access**: Admin Only
-* **Headers**: `Authorization: Bearer <token>`
-* **Request Body** (All fields optional):
-    ```json
-    {
-      "price": 14500000,
-      "stock": 15
-    }
-    ```
+* **Headers**: 
+    * `Authorization: Bearer <token>`
+    * `Content-Type: multipart/form-data`
+* **Form Data Fields** (All fields optional):
+    * `price`: 14500000
+    * `stock`: 15
+    * `image`: (File) New Product Image
 
 #### Delete Product
 Removes a product from the database. Note: Products with existing transaction history cannot be deleted to preserve data integrity.
@@ -190,3 +191,8 @@ Cancels a pending order and automatically restores the stock quantities to the p
     ```bash
     npm run dev
     ```
+
+## Frontend Demo
+
+This project includes a simple `index.html` file using Bootstrap 5 and Vanilla JS to demonstrate the API usage.
+* Open `index.html` in your browser (or use Live Server extension) to test Login, Product Management (with image preview), and Checkout flow.

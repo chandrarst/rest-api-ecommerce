@@ -16,6 +16,8 @@ const createProduct = async (req, res) => {
   try {
     const { name, price, stock, description } = req.body;
 
+    const photoPath = req.file ? `/uploads/${req.file.filename}` : null;
+
     if (!name || !price || !stock) {
       return res.status(400).json({ error: "Name, price, and stock are required." });
     }
@@ -25,7 +27,8 @@ const createProduct = async (req, res) => {
         name,
         price: parseFloat(price),
         stock: parseInt(stock),
-        description
+        description,
+        photo: photoPath
       }
     });
 
@@ -43,14 +46,11 @@ const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, stock, description } = req.body;
+    
+    const newPhoto = req.file ? `/uploads/${req.file.filename}` : undefined;
 
-    const product = await prisma.product.findUnique({
-      where: { id: parseInt(id) }
-    });
-
-    if (!product) {
-      return res.status(404).json({ error: "Product not found." });
-    }
+    const product = await prisma.product.findUnique({ where: { id: parseInt(id) } });
+    if (!product) return res.status(404).json({ error: "Product not found." });
 
     const updatedProduct = await prisma.product.update({
       where: { id: parseInt(id) },
@@ -58,14 +58,12 @@ const updateProduct = async (req, res) => {
         name: name || product.name,
         price: price ? parseFloat(price) : product.price,
         stock: stock ? parseInt(stock) : product.stock,
-        description: description || product.description
+        description: description || product.description,
+        photo: newPhoto || product.photo
       }
     });
 
-    res.json({ 
-      message: "Product updated successfully.", 
-      data: updatedProduct 
-    });
+    res.json({ message: "Product updated successfully.", data: updatedProduct });
 
   } catch (error) {
     console.error(error);
@@ -76,21 +74,13 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const product = await prisma.product.findUnique({ where: { id: parseInt(id) } });
 
-    const product = await prisma.product.findUnique({
-      where: { id: parseInt(id) }
-    });
+    if (!product) return res.status(404).json({ error: "Product not found." });
 
-    if (!product) {
-      return res.status(404).json({ error: "Product not found." });
-    }
-
-    await prisma.product.delete({
-      where: { id: parseInt(id) }
-    });
+    await prisma.product.delete({ where: { id: parseInt(id) } });
 
     res.json({ message: "Product deleted successfully." });
-
   } catch (error) {
     if (error.code === 'P2003') {
       return res.status(400).json({ error: "Cannot delete this product because it has transaction history." });
