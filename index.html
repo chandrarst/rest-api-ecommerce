@@ -69,14 +69,14 @@
 
                 <div id="cart-col" class="col-md-4">
                     <div class="card shadow-sm sticky-top" style="top: 20px;">
-                        <div class="card-header bg-white fw-bold">Shopping Cart 🛒</div>
+                        <div class="card-header bg-white fw-bold">Shopping Cart</div>
                         <div class="card-body">
                             <ul id="cart-list" class="list-group list-group-flush mb-3">
                                 <li class="list-group-item text-muted text-center">Empty</li>
                             </ul>
                             <div class="d-flex justify-content-between fw-bold mb-3">
                                 <span>Total:</span>
-                                <span id="cart-total">$0</span>
+                                <span id="cart-total">Rp 0</span>
                             </div>
                             <button onclick="openCheckoutModal()" class="btn btn-primary w-100" id="btn-checkout" disabled>Checkout</button>
                         </div>
@@ -261,7 +261,7 @@
                                 <img src="${imgUrl}" class="card-img-top product-img" alt="${p.name}">
                                 <div class="card-body">
                                     <h5 class="card-title">${p.name}</h5>
-                                    <h6 class="text-primary">$${p.price.toLocaleString()}</h6>
+                                    <h6 class="text-primary">Rp ${p.price.toLocaleString()}</h6>
                                     <p class="mb-0 small text-muted">Stock: ${p.stock}</p>
                                 </div>
                             </div>
@@ -282,9 +282,15 @@
             const inputs = ['p-name', 'p-desc', 'p-price', 'p-stock'];
 
             if(product && product.photo) {
-                imgPreview.src = `${BASE_URL}${product.photo}`;
+                if (product.photo.startsWith('http')) {
+                    imgPreview.src = product.photo;
+                } else {
+                    imgPreview.src = `${BASE_URL}${product.photo}`;
+                }
                 imgPreview.classList.remove('d-none');
-            } else { imgPreview.classList.add('d-none'); }
+            } else { 
+                imgPreview.classList.add('d-none'); 
+            }
 
             if (isAdmin) {
                 qtySection.classList.add('d-none');
@@ -383,8 +389,8 @@
 
             if (cart.length === 0) {
                 cartBtn.disabled = true;
-                cartTotal.innerText = "$0";
-                grandTotalEl.innerText = "$0";
+                cartTotal.innerText = "Rp 0";
+                grandTotalEl.innerText = "Rp 0";
                 tbody.innerHTML = '<tr><td colspan="4" class="text-center">Cart is empty</td></tr>';
                 return;
             } else {
@@ -394,7 +400,14 @@
             cart.forEach((item, index) => {
                 const subtotal = item.price * item.quantity;
                 total += subtotal;
-                const imgUrl = item.photo ? `${BASE_URL}${item.photo}` : 'https://placehold.co/50x50?text=img';
+                let imgUrl = 'https://placehold.co/50x50?text=img';
+                if (item.photo) {
+                    if (item.photo.startsWith('http')) {
+                        imgUrl = item.photo;
+                    } else {
+                        imgUrl = `${BASE_URL}${item.photo}`;
+                    }
+                }
                 
                 tbody.innerHTML += `
                     <tr>
@@ -404,18 +417,18 @@
                                 <span>${item.name}</span>
                             </div>
                         </td>
-                        <td>$${item.price.toLocaleString()}</td>
+                        <td>Rp ${item.price.toLocaleString()}</td>
                         <td>${item.quantity}</td>
                         <td class="text-end fw-bold">
-                            $${subtotal.toLocaleString()} 
+                            Rp ${subtotal.toLocaleString()} 
                             <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeFromCart(${index})">x</button>
                         </td>
                     </tr>
                 `;
             });
 
-            cartTotal.innerText = "$" + total.toLocaleString();
-            grandTotalEl.innerText = "$" + total.toLocaleString();
+            cartTotal.innerText = "Rp " + total.toLocaleString();
+            grandTotalEl.innerText = "Rp " + total.toLocaleString();
             
         }
         
@@ -460,11 +473,31 @@
             if(orders.length === 0) html = '<p class="text-center">No orders.</p>';
             orders.forEach(o => {
                 let itemsHtml = o.items.map(i => `<li>${i.product.name} (${i.quantity}x)</li>`).join('');
-                html += `<div class="card mb-3"><div class="card-header d-flex justify-content-between"><span>Order #${o.id}</span><span class="badge bg-${o.status === 'CANCELLED' ? 'danger' : 'success'}">${o.status}</span></div><div class="card-body"><ul>${itemsHtml}</ul><p class="fw-bold mb-1">Total: $${o.totalPrice.toLocaleString()}</p>${o.status !== 'CANCELLED' ? `<button onclick="cancelOrder(${o.id})" class="btn btn-sm btn-outline-danger float-end">Cancel</button>` : ''}</div></div>`;
+                html += `
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between">
+                        <span>Order #${o.id}</span>
+                        <span class="badge bg-${o.status === 'CANCELLED' ? 'danger' : 'success'}">${o.status}</span>
+                    </div>
+                    <div class="card-body">
+                        <ul>${itemsHtml}</ul>
+                        <p class="fw-bold mb-1">Total: Rp ${o.totalPrice.toLocaleString()}</p> ${o.status !== 'CANCELLED' ? `
+                        <button onclick="cancelOrder(${o.id})" class="btn btn-sm btn-outline-danger float-end">Cancel</button>` : ''}
+                    </div>
+                </div>`;
             });
             document.getElementById('order-history-body').innerHTML = html;
         }
-        async function cancelOrder(id) { if(!confirm("Cancel?")) return; const token = localStorage.getItem('token'); const res = await fetch(`${API_URL}/orders/${id}/cancel`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); if(res.ok) { loadOrders(); loadProducts(); } }
+        async function cancelOrder(id){ 
+            if(!confirm("Cancel?")) return; const token = localStorage.getItem('token');
+
+            const res = await fetch(`${API_URL}/orders/${id}/cancel`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+
+            if(res.ok) {
+                loadOrders(); loadProducts() 
+            }
+        }
+        
         function handleModalAction() {}
     </script>
 </body>
