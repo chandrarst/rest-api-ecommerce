@@ -16,7 +16,10 @@ const createProduct = async (req, res) => {
   try {
     const { name, price, stock, description } = req.body;
 
-    const photoPath = req.file ? `/uploads/${req.file.filename}` : null;
+    let photoPath = null;
+    if (req.file) {
+        photoPath = req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`;
+    }
 
     if (!name || !price || !stock) {
       return res.status(400).json({ error: "Name, price, and stock are required." });
@@ -47,7 +50,10 @@ const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, price, stock, description } = req.body;
     
-    const newPhoto = req.file ? `/uploads/${req.file.filename}` : undefined;
+    let newPhoto = undefined;
+    if (req.file) {
+        newPhoto = req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`;
+    }
 
     const product = await prisma.product.findUnique({ where: { id: parseInt(id) } });
     if (!product) return res.status(404).json({ error: "Product not found." });
