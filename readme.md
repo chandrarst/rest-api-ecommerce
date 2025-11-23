@@ -1,6 +1,6 @@
-# E-Commerce REST API & Frontend Demo
+# E-Commerce REST API & Simple Frontend Demo
 
-A Fullstack E-Commerce application built with **Node.js**, **Express**, **PostgreSQL**, and **Vanilla JS**.
+A Fullstack E-Commerce application focused on backend features. Built with **Node.js**, **Express**, **PostgreSQL**, and **Vanilla JS**.
 This project demonstrates a complete flow of an e-commerce system, including secure authentication, role-based access control, product management with image uploads, and transactional order processing.
 
 ## Live Demo
