@@ -1,167 +1,39 @@
-# E-Commerce REST API Backend
+# E-Commerce REST API & Frontend Demo
 
-This repository contains the backend source code for a robust E-Commerce application. It is built using Node.js and Express, utilizing PostgreSQL as the relational database and Prisma as the ORM.
+A Fullstack E-Commerce application built with **Node.js**, **Express**, **PostgreSQL**, and **Vanilla JS**.
+This project demonstrates a complete flow of an e-commerce system, including secure authentication, role-based access control, product management with image uploads, and transactional order processing.
 
-The system is designed to handle essential e-commerce functionalities including user authentication (JWT), role-based access control (Admin/Customer), product management with image uploads, and secure order processing with ACID-compliant database transactions to ensure data integrity between stock inventory and order records.
+## Live Demo
 
-## Tech Stack
+* **Frontend (Storefront):** [[LINK_NETLIFY_KAMU_DISINI](https://rest-api-ecommerce.netlify.app/)]
+* **Backend (API Docs):** [[LINK_VERCEL_KAMU_DISINI](https://rest-api-ecommerce-ruddy.vercel.app/)]
 
-* **Runtime Environment**: Node.js
-* **Framework**: Express.js
-* **Database**: PostgreSQL (via Docker)
-* **ORM**: Prisma
-* **Authentication**: JSON Web Token (JWT) & Bcrypt
-* **File Handling**: Multer (Local Storage)
-* **Containerization**: Docker & Docker Compose
+---
 
 ## Features
 
-* **Secure Authentication**: User registration and login mechanisms using hashed passwords and JWT for session management.
-* **Role-Based Access Control (RBAC)**: Middleware to differentiate between 'Customer' and 'Admin' roles, restricting sensitive endpoints.
-* **Product Management**: Full CRUD capabilities for administrators to manage inventory, including **Image Upload**.
-* **Transactional Orders**: Implementation of database transactions (`prisma.$transaction`) to ensure that order creation and stock deduction happen atomically. If one fails, both rollback.
-* **Order History & Cancellation**: Users can view their specific order history and cancel orders, which automatically restores the product stock.
-* **Static File Serving**: Serves uploaded product images publicly.
+* **Authentication**: Secure Register & Login (JWT + Bcrypt).
+* **Authorization**: RBAC (Role-Based Access Control) for Admin vs Customer.
+* **Product Management**:
+    * CRUD operations (Admin only).
+    * **Image Upload** supported via **Cloudinary** (Production) and Local Storage (Development).
+* **Order System**:
+    * **ACID Transactions**: Ensures stock is deducted only when the order is successfully recorded.
+    * **Order History**: Users can view their past orders.
+    * **Cancellation**: Canceling an order automatically restores product stock.
+* **Frontend**: A simple UI built with Bootstrap 5 and Vanilla JS (Single Page Application logic/simple standalone html file).
+
+## Tech Stack
+
+* **Backend**: Node.js, Express.js
+* **Database**: PostgreSQL (hosted on **Supabase**)
+* **ORM**: Prisma
+* **Storage**: Cloudinary (for image hosting)
+* **Deployment**: Vercel (Backend) & Netlify (Frontend)
 
 ---
 
-## API Documentation
-
-### 1. Authentication
-
-**Base URL**: `/api/auth`
-
-#### Register New User
-Creates a new user account. Default role is 'CUSTOMER'.
-
-* **URL**: `/register`
-* **Method**: `POST`
-* **Access**: Public
-* **Request Body**:
-    ```json
-    {
-      "name": "John Doe",
-      "email": "john@example.com",
-      "password": "securepassword123"
-    }
-    ```
-
-#### Login
-Authenticates a user and returns a JWT (Bearer Token) for accessing protected routes.
-
-* **URL**: `/login`
-* **Method**: `POST`
-* **Access**: Public
-* **Request Body**:
-    ```json
-    {
-      "email": "john@example.com",
-      "password": "securepassword123"
-    }
-    ```
-* **Response**:
-    ```json
-    {
-      "message": "Login successful",
-      "token": "eyJhbGciOiJIUzI1NiIsInR...",
-      "user": { "id": 1, "role": "CUSTOMER" }
-    }
-    ```
-
----
-
-### 2. Products
-
-**Base URL**: `/api/products`
-
-#### Get All Products
-Retrieves a list of all available products.
-
-* **URL**: `/`
-* **Method**: `GET`
-* **Access**: Public
-
-#### Create Product
-Adds a new product to the inventory.
-**Note:** This endpoint uses `multipart/form-data` for file uploads.
-
-* **URL**: `/`
-* **Method**: `POST`
-* **Access**: Admin Only
-* **Headers**: 
-    * `Authorization: Bearer <token>`
-    * `Content-Type: multipart/form-data`
-* **Form Data Fields**:
-    * `name`: (Text) Product Name
-    * `description`: (Text) Product Description
-    * `price`: (Number) Product Price
-    * `stock`: (Number) Product Stock
-    * `image`: (File) Product Image (Optional, max 5MB)
-
-#### Update Product
-Updates an existing product's details or image.
-
-* **URL**: `/:id`
-* **Method**: `PUT`
-* **Access**: Admin Only
-* **Headers**: 
-    * `Authorization: Bearer <token>`
-    * `Content-Type: multipart/form-data`
-* **Form Data Fields** (All fields optional):
-    * `price`: 14500000
-    * `stock`: 15
-    * `image`: (File) New Product Image
-
-#### Delete Product
-Removes a product from the database. Note: Products with existing transaction history cannot be deleted to preserve data integrity.
-
-* **URL**: `/:id`
-* **Method**: `DELETE`
-* **Access**: Admin Only
-* **Headers**: `Authorization: Bearer <token>`
-
----
-
-### 3. Orders
-
-**Base URL**: `/api/orders`
-
-#### Checkout (Create Order)
-Processes a transaction. This endpoint validates stock availability, deducts stock, and records the order within a single database transaction.
-
-* **URL**: `/checkout`
-* **Method**: `POST`
-* **Access**: Customer (Authenticated)
-* **Headers**: `Authorization: Bearer <token>`
-* **Request Body**:
-    ```json
-    {
-      "items": [
-        { "productId": 1, "quantity": 1 },
-        { "productId": 2, "quantity": 3 }
-      ]
-    }
-    ```
-
-#### Get My Orders
-Retrieves the order history for the currently logged-in user.
-
-* **URL**: `/my-orders`
-* **Method**: `GET`
-* **Access**: Customer (Authenticated)
-* **Headers**: `Authorization: Bearer <token>`
-
-#### Cancel Order
-Cancels a pending order and automatically restores the stock quantities to the products.
-
-* **URL**: `/:id/cancel`
-* **Method**: `DELETE`
-* **Access**: Customer (Authenticated)
-* **Headers**: `Authorization: Bearer <token>`
-
----
-
-## Installation & Setup
+## Installation & Local Setup
 
 1.  **Clone the repository**
     ```bash
@@ -174,25 +46,47 @@ Cancels a pending order and automatically restores the stock quantities to the p
     npm install
     ```
 
-3.  **Environment Variables**
-    Create a `.env` file based on `.env.example` and configure your database credentials and JWT secret.
-
-4.  **Database Setup (Docker)**
-    ```bash
-    docker-compose up -d
+3.  **Setup Environment Variables**
+    Create a `.env` file in the root directory and add the following keys:
+    ```env
+    # Database (Supabase/Local)
+    DATABASE_URL="postgresql://user:password@host:6543/db?pgbouncer=true"
+    DIRECT_URL="postgresql://user:password@host:5432/db"
+    
+    # Security
+    JWT_SECRET="your_super_secret_key"
+    
+    # Image Storage (Cloudinary)
+    CLOUDINARY_CLOUD_NAME="your_cloud_name"
+    CLOUDINARY_API_KEY="your_api_key"
+    CLOUDINARY_API_SECRET="your_api_secret"
     ```
 
-5.  **Run Migrations**
+4.  **Run Migrations**
     ```bash
     npx prisma migrate dev --name init
     ```
 
-6.  **Start the Server**
+5.  **Start the Server**
     ```bash
     npm run dev
     ```
+    The server will run on `http://localhost:3000`.
 
-## Frontend Demo
+---
 
-This project includes a simple `index.html` file using Bootstrap 5 and Vanilla JS to demonstrate the API usage.
-* Open `index.html` in your browser (or use Live Server extension) to test Login, Product Management (with image preview), and Checkout flow.
+## API Endpoints Overview
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Register new user | Public |
+| **POST** | `/api/auth/login` | Login & get Token | Public |
+| **GET** | `/api/products` | Get all products | Public |
+| **POST** | `/api/products` | Create product (w/ Image) | Admin |
+| **PUT** | `/api/products/:id` | Update product | Admin |
+| **DELETE** | `/api/products/:id` | Delete product | Admin |
+| **POST** | `/api/orders/checkout`| Create transaction | User |
+| **GET** | `/api/orders/my-orders`| Get order history | User |
+| **DELETE** | `/api/orders/:id/cancel`| Cancel order & restore stock | User |
+
+---
