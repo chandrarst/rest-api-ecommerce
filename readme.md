@@ -71,7 +71,6 @@ This project demonstrates a complete flow of an e-commerce system, including sec
     ```bash
     npm run dev
     ```
-    The server will run on `http://localhost:3000`.
 
 ---
 
